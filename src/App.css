@@ -138,6 +138,7 @@ html {
 /* Scroll indicator animation */
 .scroll-indicator div:last-child {
   animation: bounce 2s infinite;
+  position: absolute;
   top: 107px;
   height: 26px;
   width: auto;
