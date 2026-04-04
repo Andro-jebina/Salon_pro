@@ -182,16 +182,18 @@ Booking Confirmed - Crystal Salon
 
 ## ⚙️ Step 5: Update Your React Code
 
-In your `src/components/Booking.jsx` file, update the `EMAILJS_CONFIG` object:
+In your `src/pages/Booking.jsx` file, make sure the EmailJS values are loaded from Vite environment variables.
 
-```javascript
-const EMAILJS_CONFIG = {
-  serviceId: 'your_actual_service_id_here', // From step 2
-  ownerTemplateId: 'salon_owner_booking', // Template name from step 3
-  userTemplateId: 'customer_confirmation', // Template name from step 3
-  publicKey: 'your_actual_public_key_here' // From step 4
-};
+Create a local `.env` or `.env.local` file with these keys:
+
+```bash
+VITE_EMAILJS_SERVICE_ID=your_emailjs_service_id
+VITE_EMAILJS_OWNER_TEMPLATE_ID=salon_owner_booking
+VITE_EMAILJS_USER_TEMPLATE_ID=customer_confirmation
+VITE_EMAILJS_PUBLIC_KEY=your_actual_public_key_here
 ```
+
+Then restart the development server so Vite picks up the new env values.
 
 ---
 

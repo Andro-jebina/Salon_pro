@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 
+const EMAILJS_CONFIG = {
+  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
+  ownerTemplateId: import.meta.env.VITE_EMAILJS_OWNER_TEMPLATE_ID || '',
+  userTemplateId: import.meta.env.VITE_EMAILJS_USER_TEMPLATE_ID || '',
+  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
+};
+
+const isEmailJsConfigured = Object.values(EMAILJS_CONFIG).every((value) => Boolean(value));
+
 const Booking = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -16,16 +25,13 @@ const Booking = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    // Initialize EmailJS
+    if (!isEmailJsConfigured) {
+      console.warn('EmailJS is not configured. Set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_OWNER_TEMPLATE_ID, VITE_EMAILJS_USER_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY in your .env file.');
+      return;
+    }
+
     emailjs.init(EMAILJS_CONFIG.publicKey);
   }, []);
-
-  const EMAILJS_CONFIG = {
-    serviceId: 'Service0987',
-    ownerTemplateId: 'template_pmzpers',
-    userTemplateId: 'template_n66y9zd',
-    publicKey: '-P7MVwgQiMAIYtxRL'
-  };
 
   const services = ['Facial', 'Haircut', 'Hair Spa', 'Nail Art'];
 
@@ -70,7 +76,8 @@ const Booking = () => {
           customer_phone: data.phone,
           service: data.service,
           date: data.date,
-          time: data.time
+          time: data.time,
+          booking_date: new Date().toLocaleString()
         },
         EMAILJS_CONFIG.publicKey
       );
@@ -84,14 +91,21 @@ const Booking = () => {
           to_email: data.email,
           service: data.service,
           date: data.date,
-          time: data.time
+          time: data.time,
+          salon_address: '123 Crystal Salon Road',
+          salon_contact: '+1 555-123-4567'
         },
         EMAILJS_CONFIG.publicKey
       );
 
       return true;
     } catch (err) {
-      console.error('EmailJS Error:', err);
+      const errorMessage = err?.text || err?.message || JSON.stringify(err);
+      console.error('EmailJS Error:', errorMessage, err);
+      setMessage({
+        type: 'error',
+        text: `Email failed: ${errorMessage}. Check your EmailJS Service ID, Template IDs, and Public Key.`
+      });
       return false;
     }
   };
@@ -105,12 +119,19 @@ const Booking = () => {
       return;
     }
 
+    if (!isEmailJsConfigured) {
+      setMessage({
+        type: 'error',
+        text: 'EmailJS is not configured. Please add your VITE_EMAILJS_* values to a local .env file.'
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     const success = await sendEmails(formData);
 
     if (!success) {
-      setMessage({ type: 'error', text: 'Email failed. Please check your EmailJS configuration and try again.' });
       setIsLoading(false);
       return;
     }
